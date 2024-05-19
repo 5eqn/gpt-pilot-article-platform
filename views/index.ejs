@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main role="main" class="container mt-4">
+      <div class="text-center">
+        <h1>Article_platform</h1>
+        <% if (session && session.user && session.user.isAdmin) { %>
+          <a href="/admin">Admin Panel</a>
+        <% } %>
+      </div>
+      <div class="container mt-5">
+        <h2>All Articles</h2>
+        <% articles.forEach(article => { %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><%= article.title %></h5>
+              <p class="card-text"><%= article.publishDate.toLocaleDateString() %></p>
+              <a href="/article/<%= article._id %>" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+  <script src="/js/main.js"></script>
+</html>

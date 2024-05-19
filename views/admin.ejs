@@ -1,0 +1,21 @@
+<% include('partials/_head.ejs') %>
+<body>
+  <% include('partials/_header.ejs') %>
+  <div class="container mt-4">
+    <h1>Admin Panel</h1>
+    <a href="/admin/create" class="btn btn-primary">Create Article</a>
+    <ul>
+      <% articles.forEach(article => { %>
+        <li>
+          <a href="/article/<%= article._id %>"><strong><%= article.title %></strong></a> - <%= article.publishDate %>
+          <form action="/admin/delete/<%= article._id %>" method="POST">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this article?');">Delete</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <% include('partials/_footer.ejs') %>
+</body>
+</html>

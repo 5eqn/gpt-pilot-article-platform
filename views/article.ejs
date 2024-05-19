@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+  <%- include('partials/_header.ejs') %>
+    <main role="main" class="container mt-4">
+      <h1><%= article.title %></h1>
+      <p><%= article.publishDate %></p>
+      <div class="article-content"><%- article.content %></div>
+      <section id="comments">
+        <h2>Comments</h2>
+        <form id="commentForm">
+          <input type="hidden" id="articleId" value="<%= article._id %>">
+          <textarea id="commentContent" placeholder="Write a comment..." required></textarea>
+          <button type="submit">Submit</button>
+        </form>
+        <ul id="commentList"></ul>
+      </section>
+    </main>
+  </body>
+  <%- include('partials/_footer.ejs') %>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const articleId = document.getElementById('articleId').value;
+      const commentList = document.getElementById('commentList');
+
+      try {
+        const response = await fetch(`/api/comments?articleId=${articleId}`);
+        if (response.ok) {
+          const comments = await response.json();
+          comments.forEach(comment => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <strong>${comment.user.username}:</strong> ${comment.content}
+              <button class="reply-button" data-username="${comment.user.username}">Reply</button>
+            `;
+            commentList.appendChild(li);
+          });
+        } else {
+          const error = await response.json();
+          console.error('Error fetching comments:', error);
+        }
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+
+      const commentForm = document.getElementById('commentForm');
+      const commentContent = document.getElementById('commentContent');
+
+      commentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = commentContent.value.trim();
+        if (content) {
+          try {
+            const response = await fetch('/api/comments', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ content, articleId })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              displayComment(data.message);
+              commentContent.value = '';
+            } else {
+              const error = await response.json();
+              displayComment(error.message, true);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            displayComment('An error occurred while submitting the comment.', true);
+          }
+        }
+      });
+
+      function displayComment(message, isError = false) {
+        const li = document.createElement('li');
+        li.textContent = message;
+        li.style.color = isError ? 'red' : 'green';
+        commentList.appendChild(li);
+      }
+
+      commentList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('reply-button')) {
+          const username = e.target.getAttribute('data-username');
+          commentContent.value = `@${username} ` + commentContent.value;
+        }
+      });
+    });
+  </script>
+</html>
